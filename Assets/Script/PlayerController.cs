@@ -24,25 +24,25 @@ public class PlayerController : MonoBehaviour
         gravitySources = FindObjectsOfType<GravitySource>();
     }
 
-    private void FixedUpdate()
+    private void Update()
     {
         // 1. 玩家移動輸入：有輸入時朝方向加速，沒輸入時逐漸衰減
         moveInput = inputManager.moveInput;
         if (moveInput.sqrMagnitude > 0.0001f)
         {
-            velocity += moveInput.normalized * acceleration * Time.fixedDeltaTime;
+            velocity += moveInput.normalized * acceleration * Time.deltaTime;
             velocity = Vector2.ClampMagnitude(velocity, moveSpeed);
         }
         else
         {
-            velocity *= Mathf.Pow(drag, Time.fixedDeltaTime);
+            velocity *= Mathf.Pow(drag, Time.deltaTime);
         }
 
         // 2. 計算總引力並持續作用在速度上
         Vector2 totalGravity = CalculateTotalGravity();
-        velocity += totalGravity * gravityInfluence * Time.fixedDeltaTime;
+        velocity += totalGravity * gravityInfluence * Time.deltaTime;
 
-        rb.linearVelocity = velocity;
+        transform.position += (Vector3)velocity * Time.deltaTime;
     }
 
     private Vector2 CalculateTotalGravity()
