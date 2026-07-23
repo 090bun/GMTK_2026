@@ -115,4 +115,9 @@ public class PlayerController : MonoBehaviour
         }
         return gravity;
     }
+
+    public void AddEnergy(float energy)
+    {
+        currentEnergy = Mathf.Min(currentEnergy + energy, maxEnergy);
+    }
 }
