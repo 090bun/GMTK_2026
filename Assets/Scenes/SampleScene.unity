@@ -650,7 +650,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 58b925cb5532b844e9cf4048c638887b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
-  moveSpeed: 5
+  drag: 0.9
+  gravityInfluence: 1
+  maxEnergy: 100
+  currentEnergy: 100
+  maxChargeTime: 2
+  slowMotionScale: 0.3
+  minConsumption: 5
+  maxConsumption: 20
+  minBoostSpeed: 2
+  maxBoostSpeed: 25
   inputManager: {fileID: 778758964}
 --- !u!136 &778758966
 CapsuleCollider:
@@ -1120,6 +1129,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1863703754}
+  - component: {fileID: 1863703755}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -1142,6 +1152,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1863703755
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1863703753}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbf3ef22081f4354eb22de69aa6ab0ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: '::'
+  inputManager: {fileID: 778758964}
+  slowMotionScale: 0.3
+  playerController: {fileID: 778758965}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

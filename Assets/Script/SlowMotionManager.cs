@@ -2,12 +2,13 @@ using UnityEngine;
 
 public class SlowMotionManager : MonoBehaviour
 {
-    public InputManager inputManager;
-    public float slowMotionScale = 0.3f; // 0.3 = 剩餘30%時間流逝速度
+    [SerializeField] private  InputManager inputManager;
+    [SerializeField] private  float slowMotionScale = 0.3f; // 0.3 = 剩餘30%時間流逝速度
+    [SerializeField] private PlayerController playerController;
     private bool isSlowMotion = false;
     void Update()
     {
-        if (inputManager.moveInput.sqrMagnitude > 0.0001f) {
+        if (inputManager.moveInput.sqrMagnitude > 0.0001f && playerController.currentEnergy > 0) {
             EnterSlowMotion();
         } else {
             ExitSlowMotion();
