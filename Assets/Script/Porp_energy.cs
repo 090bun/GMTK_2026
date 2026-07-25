@@ -8,6 +8,7 @@ public class Porp_energy : MonoBehaviour
     private void OnTriggerEnter(Collider other) {
         if (other.CompareTag("Player")) {
             playerController.AddEnergy(Energy);
+            Destroy(gameObject);
         }
     }
 }

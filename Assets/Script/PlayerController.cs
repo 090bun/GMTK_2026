@@ -27,6 +27,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float minBoostSpeed = 2f;
     [SerializeField] private float maxBoostSpeed = 8f;
 
+    [Header("面向噴射方向的轉向速度 (度/秒)")]
+    [SerializeField] private float rotationSpeed = 720f;
+
     private float currentConsumption = 0f;  // 若現在放開，會消耗的能量
     private float currentBoostSpeed = 0f;   // 若現在放開，會獲得的推進速度
     private float chargeTime = 0f;          // 已蓄力時間
@@ -38,6 +41,9 @@ public class PlayerController : MonoBehaviour
     private Vector2 velocity;   // 持續累積的速度，沒輸入時慢慢衰減
     private GravitySource[] gravitySources;
     public InputManager inputManager;
+
+    // ═══ 碎片尾巴（碎片被撿到後依序串接在後面） ═══
+    private Transform tailEnd;
 
     private void Awake()
     {
@@ -69,6 +75,11 @@ public class PlayerController : MonoBehaviour
             chargeDirection = moveInput.normalized;
             chargeTime = Mathf.Min(chargeTime + Time.unscaledDeltaTime, maxChargeTime);
 
+            // 蓄力時讓玩家面向即將噴射的方向
+            float targetAngle = Mathf.Atan2(chargeDirection.y, chargeDirection.x) * Mathf.Rad2Deg - 90f;
+            Quaternion targetRotation = Quaternion.Euler(0f, 0f, targetAngle);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.unscaledDeltaTime);
+
             float t = chargeTime / maxChargeTime;
             currentConsumption = Mathf.Lerp(minConsumption, maxConsumption, t);
             currentBoostSpeed = Mathf.Lerp(minBoostSpeed, maxBoostSpeed, t);
@@ -89,6 +100,35 @@ public class PlayerController : MonoBehaviour
         velocity += totalGravity * gravityInfluence * Time.deltaTime;
 
         transform.position += (Vector3)velocity * Time.deltaTime;
+
+        // 擋住玩家，避免直接穿過星球中心造成彈弓效應甩出去
+        HandleSurfaceCollision();
+    }
+
+    private void HandleSurfaceCollision()
+    {
+        foreach (GravitySource source in gravitySources)
+        {
+            Vector2 sourcePos = source.transform.position;
+            Vector2 playerPos = transform.position;
+            Vector2 offset = playerPos - sourcePos;
+            float distance = offset.magnitude;
+
+            if (distance >= source.surfaceRadius) continue;
+
+            Vector2 outward = distance > 0.0001f ? offset / distance : Vector2.up;
+
+            // 貼回表面，不讓玩家穿過去（保留原本的 z 座標）
+            Vector2 surfacePoint = sourcePos + outward * source.surfaceRadius;
+            transform.position = new Vector3(surfacePoint.x, surfacePoint.y, transform.position.z);
+
+            // 移除朝向星球中心的速度分量，保留切線/朝外分量（可用噴射脫離）
+            float radialSpeed = Vector2.Dot(velocity, outward);
+            if (radialSpeed < 0f)
+            {
+                velocity -= outward * radialSpeed;
+            }
+        }
     }
 
     private void ReleaseBoost()
@@ -116,8 +156,23 @@ public class PlayerController : MonoBehaviour
         return gravity;
     }
 
+    // 蓄力進度 (0~1)，供 UI 顯示方向鍵累積的噴射力道
+    public float ChargeProgress => maxChargeTime > 0f ? chargeTime / maxChargeTime : 0f;
+    public bool IsCharging => isCharging;
+
     public void AddEnergy(float energy)
     {
         currentEnergy = Mathf.Min(currentEnergy + energy, maxEnergy);
+    }
+
+    // 碎片撿到後要跟隨的對象：目前隊伍尾端（沒有碎片時就是玩家自己）
+    public Transform GetTailEnd()
+    {
+        return tailEnd != null ? tailEnd : transform;
+    }
+
+    public void SetTailEnd(Transform newTailEnd)
+    {
+        tailEnd = newTailEnd;
     }
 }

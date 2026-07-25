@@ -4,6 +4,7 @@ public class GravitySource : MonoBehaviour
 {
     public float gravitationalForce = 10f;  // 引力強度
     public float effectRadius = 20f;        // 有效範圍
+    public float surfaceRadius = 2f;        // 表面半徑，玩家靠近到此距離會被擋住並吸附
 
     public Vector2 GetGravityDirection(Vector3 targetPosition)
     {
@@ -26,5 +27,7 @@ public class GravitySource : MonoBehaviour
     {
         Gizmos.color = Color.blue;
         Gizmos.DrawWireSphere(transform.position, effectRadius);
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, surfaceRadius);
     }
 }
