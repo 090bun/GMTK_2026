@@ -58,9 +58,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private int totalFragments = 3;
     private int collectedFragments = 0;
 
-    [Header("黑洞（碎片收集齊時生成）")]
-    [SerializeField] private GameObject blackHolePrefab;
-    [SerializeField] private Transform blackHoleSpawnPoint;
+    [Header("黑洞（場景中預先放置，碎片收集齊時才啟動顯示）")]
+    [SerializeField] private BlackHole blackHole;
     private bool blackHoleSpawned = false;
 
     // 是否已撞上致命星球（避免重複觸發失敗）
@@ -245,20 +244,15 @@ public class PlayerController : MonoBehaviour
         
         if (collectedFragments >= totalFragments && !blackHoleSpawned)
         {
-            SpawnBlackHole();
+            ActivateBlackHole();
         }
     }
 
-    private void SpawnBlackHole()
+    private void ActivateBlackHole()
     {
-        if (blackHolePrefab == null || blackHoleSpawnPoint == null) return;
+        if (blackHole == null) return;
 
         blackHoleSpawned = true;
-        GameObject blackHoleObj = Instantiate(blackHolePrefab, blackHoleSpawnPoint.position, Quaternion.identity);
-        BlackHole blackHole = blackHoleObj.GetComponent<BlackHole>();
-        if (blackHole != null)
-        {
-            blackHole.SetTarget(transform);
-        }
+        blackHole.Activate(transform);
     }
 }
