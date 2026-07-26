@@ -30,6 +30,13 @@ public class PlayerController : MonoBehaviour
     [Header("面向噴射方向的轉向速度 (度/秒)")]
     [SerializeField] private float rotationSpeed = 720f;
 
+    [Header("噴射特效 (放開方向鍵時播放，粒子數量依蓄力力道決定)")]
+    [SerializeField] private ParticleSystem boostParticles;
+    [Header("噴射特效粒子數量範圍 [最低, 最高]")]
+    [SerializeField] private int minBoostParticles = 5;
+    [SerializeField] private int maxBoostParticles = 30;
+    
+
     private float currentConsumption = 0f;  // 若現在放開，會消耗的能量
     private float currentBoostSpeed = 0f;   // 若現在放開，會獲得的推進速度
     private float chargeTime = 0f;          // 已蓄力時間
@@ -41,15 +48,33 @@ public class PlayerController : MonoBehaviour
     private Vector2 velocity;   // 持續累積的速度，沒輸入時慢慢衰減
     private GravitySource[] gravitySources;
     public InputManager inputManager;
+    private MusicCtl musicCtl;
 
     // ═══ 碎片尾巴（碎片被撿到後依序串接在後面） ═══
     private Transform tailEnd;
+
+    // ═══ 碎片收集計數 ═══
+    [Header("需要收集的碎片總數")]
+    [SerializeField] private int totalFragments = 3;
+    private int collectedFragments = 0;
+
+    [Header("黑洞（碎片收集齊時生成）")]
+    [SerializeField] private GameObject blackHolePrefab;
+    [SerializeField] private Transform blackHoleSpawnPoint;
+    private bool blackHoleSpawned = false;
+
+    // 是否已撞上致命星球（避免重複觸發失敗）
+    private bool hasFailed = false;
+
+    // 目前受到的總引力強度，供 UI 顯示警示用
+    private float currentGravityMagnitude = 0f;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
         inputManager = FindObjectOfType<InputManager>();
         gravitySources = FindObjectsOfType<GravitySource>();
+        musicCtl = FindObjectOfType<MusicCtl>();
     }
 
     private void OnDisable()
@@ -97,6 +122,7 @@ public class PlayerController : MonoBehaviour
 
         // 引力持續作用在速度上
         Vector2 totalGravity = CalculateTotalGravity();
+        currentGravityMagnitude = totalGravity.magnitude;
         velocity += totalGravity * gravityInfluence * Time.deltaTime;
 
         transform.position += (Vector3)velocity * Time.deltaTime;
@@ -115,6 +141,11 @@ public class PlayerController : MonoBehaviour
             float distance = offset.magnitude;
 
             if (distance >= source.surfaceRadius) continue;
+
+            if (source.isDeadly)
+            {
+                Fail();
+            }
 
             Vector2 outward = distance > 0.0001f ? offset / distance : Vector2.up;
 
@@ -138,10 +169,23 @@ public class PlayerController : MonoBehaviour
 
         velocity += chargeDirection * currentBoostSpeed;
         currentEnergy = Mathf.Max(0f, currentEnergy - currentConsumption);
+        EmitBoostParticles(ChargeProgress);
+        musicCtl?.PlayBooutSound();
 
         chargeTime = 0f;
         currentConsumption = 0f;
         currentBoostSpeed = 0f;
+    }
+
+    private void EmitBoostParticles(float chargeProgress)
+    {
+        if (boostParticles == null) return;
+        int particleCount = Mathf.RoundToInt(Mathf.Lerp(minBoostParticles, maxBoostParticles, chargeProgress));
+        // boostParticles.Emit(particleCount);
+        
+        var emission = boostParticles.emission;
+        emission.rateOverTime = particleCount;
+        boostParticles.Play();
     }
 
     private Vector2 CalculateTotalGravity()
@@ -165,6 +209,16 @@ public class PlayerController : MonoBehaviour
         currentEnergy = Mathf.Min(currentEnergy + energy, maxEnergy);
     }
 
+    // 讓玩家進入失敗狀態（撞到致命星球、超出遊戲範圍等皆可呼叫）
+    public void Fail()
+    {
+        if (hasFailed) return;
+        hasFailed = true;
+        musicCtl?.PlayFailSound();
+    }
+
+    public bool HasFailed => hasFailed;
+
     // 碎片撿到後要跟隨的對象：目前隊伍尾端（沒有碎片時就是玩家自己）
     public Transform GetTailEnd()
     {
@@ -174,5 +228,34 @@ public class PlayerController : MonoBehaviour
     public void SetTailEnd(Transform newTailEnd)
     {
         tailEnd = newTailEnd;
+    }
+
+    // 目前受到的總引力強度，供 UI 顯示警示用
+    public float CurrentGravityMagnitude => currentGravityMagnitude;
+
+    public int CollectedFragments => collectedFragments;
+    public int TotalFragments => totalFragments;
+
+    public void CollectFragment()
+    {
+        collectedFragments = Mathf.Min(collectedFragments + 1, totalFragments);
+
+        if (collectedFragments >= totalFragments && !blackHoleSpawned)
+        {
+            SpawnBlackHole();
+        }
+    }
+
+    private void SpawnBlackHole()
+    {
+        if (blackHolePrefab == null || blackHoleSpawnPoint == null) return;
+
+        blackHoleSpawned = true;
+        GameObject blackHoleObj = Instantiate(blackHolePrefab, blackHoleSpawnPoint.position, Quaternion.identity);
+        BlackHole blackHole = blackHoleObj.GetComponent<BlackHole>();
+        if (blackHole != null)
+        {
+            blackHole.SetTarget(transform);
+        }
     }
 }

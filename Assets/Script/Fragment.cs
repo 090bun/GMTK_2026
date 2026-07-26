@@ -9,17 +9,21 @@ public class Fragment : MonoBehaviour
     [SerializeField] private float drag = 0.9f;
     [Header("引力影響程度（撿到後仍會受引力影響）")]
     [SerializeField] private float gravityInfluence = 1f;
-
+    [Header("撿到時播放的特效")]
+    [SerializeField] private ParticleSystem ps;
+    
     private Transform followTarget;
     private Vector2 velocity;
     private bool attached = false;
     private GravitySource[] gravitySources;
     private Collider col;
+    private MusicCtl musicCtl;
 
     private void Awake()
     {
         gravitySources = FindObjectsOfType<GravitySource>();
         col = GetComponent<Collider>();
+        musicCtl = FindObjectOfType<MusicCtl>();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -31,9 +35,12 @@ public class Fragment : MonoBehaviour
 
         followTarget = player.GetTailEnd();
         player.SetTailEnd(transform);
+        player.CollectFragment();
+        musicCtl?.PlayPropSound();
 
         attached = true;
         col.enabled = false;
+        ps.Play();
     }
 
     private void Update()

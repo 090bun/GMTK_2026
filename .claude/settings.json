@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e ' *)",
+      "Bash(node -e \"console.log\\(BigInt\\('0x' + require\\('crypto'\\).randomBytes\\(7\\).toString\\('hex'\\)\\).toString\\(\\)\\)\")",
+      "Bash(awk '/^--- !u!1 &1959445160$/{f=1} f{print; c++} f&&c>20{exit}' Assets/Scenes/SampleScene.unity)",
+      "Bash(grep -n \"^--- !u!.* &1959445164$\\\\|^--- !u!.* &1959445163$\" Assets/Scenes/SampleScene.unity)",
+      "Bash(xargs grep -l \"_BlitTexture\")",
+      "Bash(python3 -c \"import uuid; print\\(uuid.uuid4\\(\\).hex\\); print\\(uuid.uuid4\\(\\).hex\\); print\\(uuid.uuid4\\(\\).hex\\)\")",
+      "Bash(node -e \"const {randomBytes}=require\\('crypto'\\); for\\(let i=0;i<3;i++\\) console.log\\(randomBytes\\(16\\).toString\\('hex'\\)\\)\")"
+    ]
+  }
+}
