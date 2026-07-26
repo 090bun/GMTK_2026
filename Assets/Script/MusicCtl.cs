@@ -14,6 +14,7 @@ public class MusicCtl : MonoBehaviour
         audioSource = seSource.GetComponent<AudioSource>();
         audioSource.clip = BGM;
         audioSource.Play();
+        audioSource.loop = true;
     }
 
     public void PlayBooutSound(){

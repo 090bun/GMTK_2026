@@ -221,6 +221,17 @@ public class PlayerController : MonoBehaviour
 
     public bool HasFailed => hasFailed;
 
+    // 讓玩家進入過關狀態（抵達終點時呼叫）
+    private bool hasWon = false;
+    public void Win()
+    {
+        if (hasWon || hasFailed) return;
+        hasWon = true;
+        timeUI.stopTimer = true;
+    }
+
+    public bool HasWon => hasWon;
+
     // 碎片撿到後要跟隨的對象：目前隊伍尾端（沒有碎片時就是玩家自己）
     public Transform GetTailEnd()
     {

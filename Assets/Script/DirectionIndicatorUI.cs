@@ -27,6 +27,13 @@ public class DirectionIndicatorUI : MonoBehaviour
     [SerializeField] private Camera mainCamera;
     [SerializeField] private Sprite defaultIcon; // 目標沒有自訂圖示時(例如星球)使用的預設圖案
 
+    [Header("黑洞警示 UI (獨立於一般星球指示器，偵測範圍多10%，同樣貼在螢幕邊緣)")]
+    [SerializeField] private BlackHole blackHole;
+    [SerializeField] private GameObject bhWarningUI;
+    [SerializeField] private float blackHoleRangeMultiplier = 1.1f;
+    private GravitySource blackHoleGravitySource;
+    private RectTransform bhWarningRect;
+
     private struct TargetInfo
     {
         public Sprite icon;
@@ -52,6 +59,8 @@ public class DirectionIndicatorUI : MonoBehaviour
         if (mainCamera == null) mainCamera = Camera.main;
 
         gravitySources = FindObjectsOfType<GravitySource>();
+        if (blackHole != null) blackHoleGravitySource = blackHole.GetComponent<GravitySource>();
+        if (bhWarningUI != null) bhWarningRect = bhWarningUI.GetComponent<RectTransform>();
 
         CreateScreenBoundary();
     }
@@ -77,21 +86,26 @@ public class DirectionIndicatorUI : MonoBehaviour
 
     private void Update()
     {
-        if (player == null || indicatorRoot == null || indicatorPrefab == null) return;
+        if (player == null) return;
 
         if (Screen.width != lastScreenSize.x || Screen.height != lastScreenSize.y)
         {
             UpdateScreenBoundary();
         }
 
-        scanTimer -= Time.unscaledDeltaTime;
-        if (scanTimer <= 0f)
+        if (indicatorRoot != null && indicatorPrefab != null)
         {
-            scanTimer = scanInterval;
-            ScanForTargets();
+            scanTimer -= Time.unscaledDeltaTime;
+            if (scanTimer <= 0f)
+            {
+                scanTimer = scanInterval;
+                ScanForTargets();
+            }
+
+            RefreshIndicators();
         }
 
-        RefreshIndicators();
+        UpdateBlackHoleIndicator();
     }
 
     private void ScanForTargets()
@@ -100,7 +114,7 @@ public class DirectionIndicatorUI : MonoBehaviour
 
         foreach (GravitySource source in gravitySources)
         {
-            if (source == null) continue;
+            if (source == null || source == blackHoleGravitySource) continue;
             Transform t = source.transform;
             float dist = Mathf.Max(Vector2.Distance(player.position, t.position) - source.surfaceRadius, 0f);
             if (dist >= detectRangeMin && dist <= detectRangeMax)
@@ -159,14 +173,38 @@ public class DirectionIndicatorUI : MonoBehaviour
         }
     }
 
-    private void PlaceIndicator(Transform target, DirectionIndicatorItem item, Sprite icon, float targetRadius)
+    // 黑洞警示顯示/隱藏場景中既有的 BHWarningUI，並比照其他指示器貼在螢幕邊緣；偵測範圍比一般星球多10%
+    private void UpdateBlackHoleIndicator()
+    {
+        if (bhWarningUI == null) return;
+
+        if (blackHole == null || blackHoleGravitySource == null || !blackHole.IsActivated)
+        {
+            bhWarningUI.SetActive(false);
+            return;
+        }
+
+        float dist = Mathf.Max(Vector2.Distance(player.position, blackHole.transform.position) - blackHoleGravitySource.surfaceRadius, 0f);
+        bool inRange = dist <= detectRangeMax * blackHoleRangeMultiplier;
+
+        bhWarningUI.SetActive(inRange);
+        if (inRange && bhWarningRect != null)
+        {
+            Vector2 edgePoint = GetEdgeScreenPosition(blackHole.transform.position, out _);
+            bhWarningRect.position = edgePoint;
+        }
+    }
+
+    // 從畫面中心朝目標方向做 Physics2D.Raycast，算出指示器要貼在螢幕邊緣的哪個位置
+    private Vector2 GetEdgeScreenPosition(Vector3 targetWorldPosition, out Vector2 direction)
     {
         Vector2 screenCenter = new Vector2(Screen.width, Screen.height) * 0.5f;
-        Vector2 targetScreenPos = mainCamera.WorldToScreenPoint(target.position);
+        Vector2 targetScreenPos = mainCamera.WorldToScreenPoint(targetWorldPosition);
 
         Vector2 dir = targetScreenPos - screenCenter;
         if (dir.sqrMagnitude < 0.0001f) dir = Vector2.up;
         dir.Normalize();
+        direction = dir;
 
         // 從畫面外一個很遠的點，沿著方向反過來射回中心，確保射線起點在邊界 collider 外面
         // (若直接從畫面中心往外射，起點會在 collider 內部，Physics2D.Raycast 偵測不到)
@@ -178,6 +216,12 @@ public class DirectionIndicatorUI : MonoBehaviour
         {
             edgePoint = hit.point;
         }
+        return edgePoint;
+    }
+
+    private void PlaceIndicator(Transform target, DirectionIndicatorItem item, Sprite icon, float targetRadius)
+    {
+        Vector2 edgePoint = GetEdgeScreenPosition(target.position, out Vector2 dir);
 
         item.SetScreenPosition(edgePoint);
         item.SetDirection(dir);

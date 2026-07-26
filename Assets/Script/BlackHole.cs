@@ -82,4 +82,7 @@ public class BlackHole : MonoBehaviour
             transform.position = Vector3.MoveTowards(transform.position, target.position, moveSpeed * Time.deltaTime);
         }
     }
+
+    // 啟動後才需要顯示方向指示器警示
+    public bool IsActivated => isActivated;
 }

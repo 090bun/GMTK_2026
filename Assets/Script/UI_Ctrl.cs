@@ -23,6 +23,7 @@ public class UI_Ctrl : MonoBehaviour
     [SerializeField] private float gravityWarningMax = 5f; // 達到此引力強度時警示顏色最紅
     [SerializeField] private Color gravitySafeColor = new Color(1f, 1f, 1f, 0f);
     [SerializeField] private Color gravityDangerColor = new Color(1f, 0f, 0f, 0.6f);
+
     [Header("選單 UI")]
     [SerializeField] private InputManager inputManager;
     [SerializeField] private GameObject menuUI;
@@ -34,13 +35,14 @@ public class UI_Ctrl : MonoBehaviour
     [SerializeField] private Material glitchMaterial;
     [SerializeField] private float glitchRampDuration = 0.7f;
     [SerializeField] private GameObject playAgainUI;
+    [SerializeField] private TextMeshProUGUI playAgainTimeText;
     private bool failSequenceStarted = false;
 
     void Update()
     {
         if (failSequenceStarted) return;
 
-        if (playerController.HasFailed)
+        if (playerController.HasFailed || playerController.HasWon)
         {
             failSequenceStarted = true;
             StartCoroutine(FailSequence());
@@ -89,6 +91,15 @@ public class UI_Ctrl : MonoBehaviour
             }
         }
 
+        if (playAgainTimeText != null)
+        {
+            bool won = playerController.HasWon;
+            playAgainTimeText.gameObject.SetActive(won);
+            if (won)
+            {
+                playAgainTimeText.text = $"Used Time: {timeUI.GetFormattedTime()}";
+            }
+        }
         playAgainUI.SetActive(true);
         Time.timeScale = 0f;
         Cursor.lockState = CursorLockMode.None;

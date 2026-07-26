@@ -22,5 +22,10 @@ public class GapSetting : MonoBehaviour
         switched = true;
         startGap.SetActive(false);
         finishGap.SetActive(true);
+
+        foreach (ParticleSystem ps in finishGap.GetComponentsInChildren<ParticleSystem>(true))
+        {
+            ps.Play();
+        }
     }
 }
