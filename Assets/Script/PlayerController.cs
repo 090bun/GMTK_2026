@@ -69,11 +69,13 @@ public class PlayerController : MonoBehaviour
     // 目前受到的總引力強度，供 UI 顯示警示用
     private float currentGravityMagnitude = 0f;
 
+    private TimeUI timeUI;
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
         inputManager = FindObjectOfType<InputManager>();
         gravitySources = FindObjectsOfType<GravitySource>();
+        timeUI = FindObjectOfType<TimeUI>();
         musicCtl = FindObjectOfType<MusicCtl>();
     }
 
@@ -214,6 +216,7 @@ public class PlayerController : MonoBehaviour
     {
         if (hasFailed) return;
         hasFailed = true;
+        timeUI.stopTimer = true;
         musicCtl?.PlayFailSound();
     }
 
@@ -239,7 +242,7 @@ public class PlayerController : MonoBehaviour
     public void CollectFragment()
     {
         collectedFragments = Mathf.Min(collectedFragments + 1, totalFragments);
-
+        
         if (collectedFragments >= totalFragments && !blackHoleSpawned)
         {
             SpawnBlackHole();

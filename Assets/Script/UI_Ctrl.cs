@@ -14,6 +14,9 @@ public class UI_Ctrl : MonoBehaviour
 
     [Header("碎片收集 UI")]
     [SerializeField] private TextMeshProUGUI fragmentText;
+    [SerializeField] private Animator fragmentAnimator;
+    [SerializeField] private string fragmentCollectTrigger = "Collect";
+    private int lastCollectedFragments = 0;
 
     [Header("引力警示 UI")]
     [SerializeField] private Image gravityWarningImage;
@@ -23,6 +26,7 @@ public class UI_Ctrl : MonoBehaviour
     [Header("選單 UI")]
     [SerializeField] private InputManager inputManager;
     [SerializeField] private GameObject menuUI;
+    [SerializeField] private TimeUI timeUI;
     private bool isMenuOpen = false;
     private bool wasMenuPressed = false;
 
@@ -54,6 +58,11 @@ public class UI_Ctrl : MonoBehaviour
         }
 
         fragmentText.text = $"fragment {playerController.CollectedFragments}/{playerController.TotalFragments}";
+        if (playerController.CollectedFragments > lastCollectedFragments && fragmentAnimator != null)
+        {
+            fragmentAnimator.SetTrigger(fragmentCollectTrigger);
+        }
+        lastCollectedFragments = playerController.CollectedFragments;
 
         float gravityT = gravityWarningMax > 0f
             ? Mathf.Clamp01(playerController.CurrentGravityMagnitude / gravityWarningMax)
@@ -97,6 +106,7 @@ public class UI_Ctrl : MonoBehaviour
     {
         isMenuOpen = open;
         menuUI.SetActive(isMenuOpen);
+        timeUI.stopTimer = isMenuOpen;
         if(isMenuOpen){
             Time.timeScale = 0f;
             Cursor.lockState = CursorLockMode.None;
@@ -123,6 +133,8 @@ public class UI_Ctrl : MonoBehaviour
             glitchMaterial.SetFloat("_GlitchIntensity", 0f);
         }
         Time.timeScale = 1f;
+        timeUI.stopTimer = false;
+        timeUI.ResetTime();
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 

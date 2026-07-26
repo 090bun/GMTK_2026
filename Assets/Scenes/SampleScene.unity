@@ -469,7 +469,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 58700335}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: BlackHole_tran
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -612,7 +612,7 @@ Transform:
   m_GameObject: {fileID: 867645784}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -7.4, y: 7.9, z: 0}
+  m_LocalPosition: {x: 331.9, y: -19.8, z: 0}
   m_LocalScale: {x: 5, y: 5, z: 5}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -30544,7 +30544,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 131, y: -38}
+  m_AnchoredPosition: {x: 131, y: -51}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1261819616
@@ -32941,6 +32941,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1543202527}
+  - component: {fileID: 1543202528}
   m_Layer: 0
   m_Name: Fragment_UI
   m_TagString: Untagged
@@ -32969,6 +32970,28 @@ RectTransform:
   m_AnchoredPosition: {x: -143, y: -50}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!95 &1543202528
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1543202526}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: fcb2608c96e9e04428dd0898391e1639, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &1544491550
 GameObject:
   m_ObjectHideFlags: 0
@@ -36476,6 +36499,7 @@ GameObject:
   - component: {fileID: 1863703757}
   - component: {fileID: 1863703759}
   - component: {fileID: 1863703760}
+  - component: {fileID: 1863703761}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -36531,12 +36555,15 @@ MonoBehaviour:
   chargeSlider: {fileID: 1457100324}
   chargeSliderStart: 0.7
   fragmentText: {fileID: 1249354042}
+  fragmentAnimator: {fileID: 1543202528}
+  fragmentCollectTrigger: Collect
   gravityWarningImage: {fileID: 1730172382}
   gravityWarningMax: 5
   gravitySafeColor: {r: 1, g: 1, b: 1, a: 0}
   gravityDangerColor: {r: 1, g: 0, b: 0, a: 0.6}
   inputManager: {fileID: 778758964}
   menuUI: {fileID: 1409570045}
+  timeUI: {fileID: 1863703761}
   glitchMaterial: {fileID: 0}
   glitchRampDuration: 0.7
   playAgainUI: {fileID: 467737810}
@@ -36603,6 +36630,20 @@ MonoBehaviour:
   FailSound:
   - {fileID: 8300000, guid: 79e2542db76cac54689762dab72e8910, type: 3}
   seSource: {fileID: 778758970}
+--- !u!114 &1863703761
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1863703753}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ac369e7c77f88348a7492440d0dda30, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TimeUI
+  timeText: {fileID: 1261819616}
+  stopTimer: 0
 --- !u!1 &1878253751
 GameObject:
   m_ObjectHideFlags: 0
@@ -40008,7 +40049,7 @@ Transform:
   m_GameObject: {fileID: 7801021149865337589}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 155.6, y: 15.1, z: 0}
+  m_LocalPosition: {x: 328.1, y: -21.9, z: 0}
   m_LocalScale: {x: 5, y: 5, z: 5}
   m_ConstrainProportionsScale: 1
   m_Children:
